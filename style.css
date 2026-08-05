@@ -20,6 +20,16 @@ body {
   color: var(--color-text);
 }
 
+/* ===== 회원·팀 관리 스타일 (담당: 김현민) =====
+   .team-card, .capacity-badge 등을 여기에 추가한다.
+   색상은 위의 :root 변수를 그대로 쓴다. 정원 초과 배지는 주황 계열. */
+
+
+/* ===== 일정 관리 스타일 (담당: 이정호) =====
+   .schedule-item, .dday-badge 등을 여기에 추가한다.
+   색상은 위의 :root 변수를 그대로 쓴다. 일정 정보는 파랑 계열. */
+
+
 /* 모바일 화면에서는 폼과 필터를 한 열로 배치한다 */
 @media (max-width: 600px) {
   .activity-form {

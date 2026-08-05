@@ -47,6 +47,26 @@
       <ul id="activityList" class="activity-list" aria-live="polite"></ul>
       <p id="emptyMessage" class="empty-message" hidden>등록된 활동이 없습니다. 첫 활동을 등록해보세요.</p>
     </section>
+    <!-- ===== 회원·팀 관리 (담당: 김현민) =====
+         이 주석 안에 아래 요소를 만든다. 다른 사람 구역은 건드리지 않는다.
+         - <form id="teamForm">   : 팀 이름(teamNameInput), 권장 정원(teamCapacityInput)
+         - <form id="memberForm"> : 회원 이름(memberNameInput), 직군(memberRoleSelect),
+                                    소속 팀(memberTeamSelect, 미배정 가능)
+         - <div id="teamList">    : 팀 카드 목록. 정원 초과 시 "정원 +N명" 배지
+         - <p id="teamEmptyMessage"> : 등록된 팀이 없을 때 안내
+    -->
+
+
+    <!-- ===== 일정 관리 (담당: 이정호) =====
+         이 주석 안에 아래 요소를 만든다. 다른 사람 구역은 건드리지 않는다.
+         - <form id="scheduleForm"> : 일정명(scheduleTitleInput), 날짜(scheduleDateInput),
+                                      구분(scheduleCategorySelect: 해커톤/축제/정기활동/기타),
+                                      장소(schedulePlaceInput), 메모(scheduleMemoInput)
+         - <ul id="scheduleList">   : D-day 가까운 순 일정 목록
+         - <p id="scheduleEmptyMessage"> : 등록된 일정이 없을 때 안내
+    -->
+
+
     <section aria-labelledby="chartHeading">
       <h2 id="chartHeading">월별 활동 횟수</h2>
       <div class="chart-box">

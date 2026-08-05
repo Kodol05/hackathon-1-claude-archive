@@ -240,12 +240,49 @@ function handleActivitySubmit(event) {
   renderActivityList();
 }
 
+/* =========================================================
+   회원·팀 관리  (담당: 김현민)
+   localStorage 키: "teams", "members"
+   teams  : { id, name, capacity, createdAt }
+   members: { id, name, role, teamId, createdAt }
+   ---------------------------------------------------------
+   구현할 함수 (이 구역 안에만 작성한다)
+   - getTeams() / saveTeams(list)
+   - getMembers() / saveMembers(list)
+   - addTeam(input)      팀 등록. capacity는 1 이상 정수 검증
+   - addMember(input)    회원 등록. 이름 중복은 대소문자 무시하고 차단
+   - countTeamMembers(teamId)  해당 팀 소속 회원 수
+   - renderTeamList()    팀 카드 + 정원 초과 시 "정원 +N명" 배지 표시
+                         (초과해도 저장은 허용, 경고만 표시)
+   ========================================================= */
+
+
+/* =========================================================
+   일정 관리  (담당: 이정호)
+   localStorage 키: "schedules"
+   schedules: { id, title, date, category, place,
+                targetTeamId, memo, convertedActivityId, createdAt }
+   ---------------------------------------------------------
+   구현할 함수 (이 구역 안에만 작성한다)
+   - getSchedules() / saveSchedules(list)
+   - addSchedule(input)  일정 등록. 날짜는 오늘 또는 미래만 허용
+   - getDaysUntil(date)  D-day 계산 (오늘 기준 남은 일수)
+   - renderScheduleList()
+       · convertedActivityId 가 없는 일정만 D-day 가까운 순으로 표시
+       · 일정이 없으면 안내 문구 표시
+   ========================================================= */
+
+
 // 기간 필터 입력을 초기화한다
 function resetPeriodFilter() {
   document.getElementById("startDateInput").value = "";
   document.getElementById("endDateInput").value = "";
   renderActivityList();
 }
+
+// --- 아래에 각자 담당 기능의 이벤트 리스너와 초기 렌더 호출을 추가한다 ---
+// 김현민: teamForm / memberForm submit 리스너 + renderTeamList();
+// 이정호: scheduleForm submit 리스너 + renderScheduleList();
 
 document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
 document.getElementById("startDateInput").addEventListener("change", renderActivityList);
