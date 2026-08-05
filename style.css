@@ -20,6 +20,36 @@ body {
   color: var(--color-text);
 }
 
+/* ===== 화면 전환 내비게이션 ===== */
+.screen-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-button {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.nav-button:hover {
+  color: var(--color-text);
+}
+
+.nav-button-active {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
 /* ===== 주간 통계 스타일 ===== */
 .week-range {
   margin: 8px 0 0;

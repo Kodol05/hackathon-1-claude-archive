@@ -1098,6 +1098,27 @@ function resetPeriodFilter() {
 
 document.getElementById("teamForm").addEventListener("submit", handleTeamSubmit);
 document.getElementById("memberForm").addEventListener("submit", handleMemberSubmit);
+/* ===== 화면 전환 (기획서 3절: 대시보드·활동·일정·회원·팀 네 화면) ===== */
+
+// 선택한 화면만 보여주고 나머지는 숨긴다
+function showScreen(target) {
+  for (const section of document.querySelectorAll("[data-screen]")) {
+    section.hidden = section.dataset.screen !== target;
+  }
+  for (const button of document.querySelectorAll(".nav-button")) {
+    button.classList.toggle("nav-button-active", button.dataset.target === target);
+  }
+  // 숨겨진 동안에는 차트 크기를 잡을 수 없으므로 화면을 열 때 다시 그린다
+  if (target === "dashboard") {
+    renderMonthlyChart();
+    renderWeeklyChart();
+  }
+}
+
+for (const button of document.querySelectorAll(".nav-button")) {
+  button.addEventListener("click", () => showScreen(button.dataset.target));
+}
+
 document.getElementById("activityTeamSelect").addEventListener("change", renderAttendanceInputs);
 document.getElementById("teamViewButton").addEventListener("click", () => setWeeklyView("team"));
 document.getElementById("memberViewButton").addEventListener("click", () => setWeeklyView("member"));
@@ -1105,6 +1126,7 @@ refreshTeamSelect();
 refreshActivityTeamSelect();
 renderTeamList();
 renderAttendanceInputs();
+showScreen("dashboard");
 
 document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
 document.getElementById("startDateInput").addEventListener("change", renderActivityList);

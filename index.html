@@ -9,13 +9,20 @@
 <body>
   <h1>동아리 활동 기록 관리</h1>
 
+  <nav class="screen-nav">
+    <button type="button" class="nav-button nav-button-active" data-target="dashboard">대시보드</button>
+    <button type="button" class="nav-button" data-target="activity">활동</button>
+    <button type="button" class="nav-button" data-target="schedule">일정</button>
+    <button type="button" class="nav-button" data-target="team">회원·팀</button>
+  </nav>
+
   <main>
-    <section aria-labelledby="dashboardHeading">
+    <section aria-labelledby="dashboardHeading" data-screen="dashboard">
       <h2 id="dashboardHeading">대시보드</h2>
       <div id="dashboard" class="dashboard"></div>
     </section>
 
-    <section aria-labelledby="formHeading">
+    <section aria-labelledby="formHeading" data-screen="activity">
       <h2 id="formHeading">활동 등록</h2>
       <p id="conversionNotice" class="conversion-notice" role="status" hidden></p>
       <form id="activityForm" class="activity-form" novalidate>
@@ -48,7 +55,7 @@
       </form>
     </section>
 
-    <section aria-labelledby="listHeading">
+    <section aria-labelledby="listHeading" data-screen="activity">
       <h2 id="listHeading">활동 목록</h2>
 
       <div class="filter-row">
@@ -70,7 +77,7 @@
          - <div id="teamList">    : 팀 카드 목록. 정원 초과 시 "정원 +N명" 배지
          - <p id="teamEmptyMessage"> : 등록된 팀이 없을 때 안내
     -->
-    <section aria-labelledby="teamHeading">
+    <section aria-labelledby="teamHeading" data-screen="team">
       <h2 id="teamHeading">회원·팀 관리</h2>
 
       <div class="form-row">
@@ -117,7 +124,7 @@
     </section>
 
 
-    <section aria-labelledby="scheduleHeading">
+    <section aria-labelledby="scheduleHeading" data-screen="schedule">
       <h2 id="scheduleHeading">일정 관리</h2>
       <form id="scheduleForm" class="schedule-form" novalidate>
         <label for="scheduleTitleInput">일정명</label>
@@ -154,7 +161,7 @@
     </section>
 
 
-    <section aria-labelledby="chartHeading">
+    <section aria-labelledby="chartHeading" data-screen="dashboard">
       <h2 id="chartHeading">월별 활동 횟수</h2>
       <div class="chart-box">
         <canvas id="monthlyChart"></canvas>
@@ -162,7 +169,7 @@
       <p id="chartEmptyMessage" class="empty-message" hidden>표시할 통계가 없습니다.</p>
     </section>
 
-    <section aria-labelledby="weeklyHeading">
+    <section aria-labelledby="weeklyHeading" data-screen="dashboard">
       <h2 id="weeklyHeading">이번 주 활동량</h2>
       <p id="weekRange" class="week-range"></p>
       <div class="filter-row">
