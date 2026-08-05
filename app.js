@@ -35,10 +35,21 @@ function createActivityListItem(activity) {
   const title = document.createElement("span");
   title.className = "activity-title";
   title.textContent = activity.title;
+
+  const actions = document.createElement("div");
+  actions.className = "activity-actions";
   const date = document.createElement("span");
   date.className = "activity-date";
   date.textContent = activity.date;
-  main.append(title, date);
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "delete-button";
+  deleteButton.textContent = "삭제";
+  deleteButton.setAttribute("aria-label", `${activity.title} 삭제`);
+  deleteButton.addEventListener("click", () => deleteActivity(activity.id));
+  actions.append(date, deleteButton);
+
+  main.append(title, actions);
 
   const sub = document.createElement("div");
   sub.className = "activity-sub";
@@ -79,6 +90,20 @@ function renderActivityList() {
   for (const activity of activities) {
     listEl.appendChild(createActivityListItem(activity));
   }
+}
+
+// 확인 절차를 거쳐 해당 id의 활동을 삭제한다
+function deleteActivity(id) {
+  const activities = getActivities();
+  const target = activities.find((activity) => activity.id === id);
+  if (!target) return;
+
+  const confirmed = confirm(`"${target.title}" 활동을 삭제할까요?`);
+  if (!confirmed) return;
+
+  const remaining = activities.filter((activity) => activity.id !== id);
+  saveActivities(remaining);
+  renderActivityList();
 }
 
 // 오늘 날짜를 YYYY-MM-DD 형식으로 반환한다

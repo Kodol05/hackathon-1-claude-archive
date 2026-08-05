@@ -88,10 +88,36 @@ body {
   font-size: 1.05rem;
 }
 
+.activity-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .activity-date {
   color: var(--color-text-muted);
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+.delete-button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border: 1px solid #b3261e;
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: #b3261e;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #fdecea;
+}
+
+.delete-button:focus-visible {
+  outline: 2px solid #b3261e;
+  outline-offset: 2px;
 }
 
 .activity-sub {
