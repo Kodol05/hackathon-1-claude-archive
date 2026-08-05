@@ -73,15 +73,31 @@ function createActivityListItem(activity) {
   return li;
 }
 
+// 기간 필터 입력값에 맞는 활동만 남긴다. 입력이 비어 있으면 전체를 반환한다
+function filterActivitiesByPeriod(activities) {
+  const start = document.getElementById("startDateInput").value;
+  const end = document.getElementById("endDateInput").value;
+
+  return activities.filter((activity) => {
+    if (start && activity.date < start) return false;
+    if (end && activity.date > end) return false;
+    return true;
+  });
+}
+
 // activities를 정렬해 목록 화면에 그린다. 비어 있으면 안내 문구만 표시한다
 function renderActivityList() {
   const listEl = document.getElementById("activityList");
   const emptyEl = document.getElementById("emptyMessage");
-  const activities = sortActivitiesByDate(getActivities());
+  const savedCount = getActivities().length;
+  const activities = sortActivitiesByDate(filterActivitiesByPeriod(getActivities()));
 
   listEl.innerHTML = "";
 
   if (activities.length === 0) {
+    emptyEl.textContent = savedCount === 0
+      ? "등록된 활동이 없습니다. 첫 활동을 등록해보세요."
+      : "선택한 기간에 해당하는 활동이 없습니다.";
     emptyEl.hidden = false;
     return;
   }
@@ -172,5 +188,15 @@ function handleActivitySubmit(event) {
   renderActivityList();
 }
 
+// 기간 필터 입력을 초기화한다
+function resetPeriodFilter() {
+  document.getElementById("startDateInput").value = "";
+  document.getElementById("endDateInput").value = "";
+  renderActivityList();
+}
+
 document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
+document.getElementById("startDateInput").addEventListener("change", renderActivityList);
+document.getElementById("endDateInput").addEventListener("change", renderActivityList);
+document.getElementById("resetFilterButton").addEventListener("click", resetPeriodFilter);
 renderActivityList();
