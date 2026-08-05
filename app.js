@@ -139,6 +139,7 @@ function renderMonthlyChart() {
 // activities를 정렬해 목록 화면에 그린다. 비어 있으면 안내 문구만 표시한다
 function renderActivityList() {
   renderMonthlyChart();
+  renderWeeklyChart();
   renderDashboard();
   const listEl = document.getElementById("activityList");
   const emptyEl = document.getElementById("emptyMessage");
@@ -862,6 +863,130 @@ function handleScheduleSubmit(event) {
 }
 
 
+/* ===== 주간 활동량 통계 (7단계) =====
+   한 주는 월요일부터 일요일까지로 본다. 현재 주 데이터만 집계한다. */
+
+let weeklyChart = null;
+let weeklyView = "team";
+
+// Date 객체를 YYYY-MM-DD 문자열로 바꾼다
+function toDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// 이번 주(월~일)의 시작일과 종료일을 반환한다
+function getCurrentWeekRange() {
+  const today = new Date(`${getTodayString()}T00:00:00`);
+  const weekday = today.getDay();
+  const offsetToMonday = weekday === 0 ? -6 : 1 - weekday;
+
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + offsetToMonday);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  return { start: toDateString(monday), end: toDateString(sunday) };
+}
+
+// 이번 주에 해당하는 활동만 반환한다
+function getThisWeekActivities() {
+  const { start, end } = getCurrentWeekRange();
+  return getActivities().filter((activity) => activity.date >= start && activity.date <= end);
+}
+
+// 회원별 이번 주 참석 횟수를 센다. 미배정 회원도 포함한다
+function countWeeklyByMember() {
+  const activities = getThisWeekActivities();
+  return getMembers()
+    .map((member) => ({
+      label: member.name,
+      count: activities.filter((activity) =>
+        (activity.attendance || []).some((r) => r.memberId === member.id && r.status === "present")
+      ).length
+    }))
+    .filter((row) => row.count > 0);
+}
+
+// 팀별 이번 주 활동 횟수를 센다. 한 활동은 팀마다 1회만 집계한다
+function countWeeklyByTeam() {
+  const activities = getThisWeekActivities();
+  const members = getMembers();
+
+  return getTeams()
+    .map((team) => {
+      let count = 0;
+      for (const activity of activities) {
+        if (activity.teamId) {
+          if (activity.teamId === team.id) count += 1;
+          continue;
+        }
+        // 전체 동아리 활동은 참석자가 있는 팀에만 1회 집계한다
+        const hasPresentMember = (activity.attendance || []).some((record) => {
+          if (record.status !== "present") return false;
+          const member = members.find((m) => m.id === record.memberId);
+          return member && member.teamId === team.id;
+        });
+        if (hasPresentMember) count += 1;
+      }
+      return { label: team.name, count };
+    })
+    .filter((row) => row.count > 0);
+}
+
+// 선택된 보기에 맞춰 이번 주 활동량 차트를 그린다
+function renderWeeklyChart() {
+  const canvas = document.getElementById("weeklyChart");
+  const emptyEl = document.getElementById("weeklyEmptyMessage");
+  const rangeEl = document.getElementById("weekRange");
+  const { start, end } = getCurrentWeekRange();
+  const rows = weeklyView === "team" ? countWeeklyByTeam() : countWeeklyByMember();
+
+  rangeEl.textContent = `${start} ~ ${end}`;
+
+  if (weeklyChart) {
+    weeklyChart.destroy();
+    weeklyChart = null;
+  }
+
+  canvas.hidden = rows.length === 0;
+  emptyEl.hidden = rows.length > 0;
+  if (rows.length === 0) return;
+
+  weeklyChart = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: rows.map((row) => row.label),
+      datasets: [{
+        label: weeklyView === "team" ? "팀 활동 횟수" : "개인 참석 횟수",
+        data: rows.map((row) => row.count),
+        backgroundColor: "#2f6fb3",
+        borderRadius: 4,
+        maxBarThickness: 48
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#e6ddd0" } }
+      }
+    }
+  });
+}
+
+// 팀별·개인별 보기를 전환한다
+function setWeeklyView(view) {
+  weeklyView = view;
+  document.getElementById("teamViewButton").classList.toggle("view-button-active", view === "team");
+  document.getElementById("memberViewButton").classList.toggle("view-button-active", view === "member");
+  renderWeeklyChart();
+}
+
 /* ===== 연속 노쇼 위험 판정 + 대시보드 (담당: 김현민) ===== */
 
 // 회원 한 명의 연속 무단 불참 횟수와 근거 활동 2건을 계산한다
@@ -974,6 +1099,8 @@ function resetPeriodFilter() {
 document.getElementById("teamForm").addEventListener("submit", handleTeamSubmit);
 document.getElementById("memberForm").addEventListener("submit", handleMemberSubmit);
 document.getElementById("activityTeamSelect").addEventListener("change", renderAttendanceInputs);
+document.getElementById("teamViewButton").addEventListener("click", () => setWeeklyView("team"));
+document.getElementById("memberViewButton").addEventListener("click", () => setWeeklyView("member"));
 refreshTeamSelect();
 refreshActivityTeamSelect();
 renderTeamList();

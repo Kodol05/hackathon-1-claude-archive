@@ -20,6 +20,31 @@ body {
   color: var(--color-text);
 }
 
+/* ===== 주간 통계 스타일 ===== */
+.week-range {
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.view-button {
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.view-button-active {
+  border-color: #2f6fb3;
+  background: #eaf2fb;
+  color: #23507f;
+  font-weight: 600;
+}
+
 /* ===== 일정 → 활동 전환 스타일 ===== */
 .conversion-notice {
   margin: 8px 0 0;

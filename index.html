@@ -161,6 +161,19 @@
       </div>
       <p id="chartEmptyMessage" class="empty-message" hidden>표시할 통계가 없습니다.</p>
     </section>
+
+    <section aria-labelledby="weeklyHeading">
+      <h2 id="weeklyHeading">이번 주 활동량</h2>
+      <p id="weekRange" class="week-range"></p>
+      <div class="filter-row">
+        <button type="button" id="teamViewButton" class="view-button view-button-active">팀별</button>
+        <button type="button" id="memberViewButton" class="view-button">개인별</button>
+      </div>
+      <div class="chart-box">
+        <canvas id="weeklyChart"></canvas>
+      </div>
+      <p id="weeklyEmptyMessage" class="empty-message" hidden>이번 주에 기록된 활동이 없습니다.</p>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
