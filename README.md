@@ -5,6 +5,13 @@
 동아리 임원이 활동 내역을 등록하고 조회·삭제할 수 있는 웹앱이다.
 서버나 데이터베이스 없이 브라우저 localStorage에만 데이터를 저장한다.
 
+## 실행 링크
+
+**https://kodol05.github.io/hackathon-1-claude-archive/**
+
+설치 없이 위 주소에서 바로 사용할 수 있다 (GitHub Pages).
+데이터는 접속한 브라우저의 localStorage에만 저장되므로 처음 열면 빈 화면에서 시작한다.
+
 ## 팀원 명단과 역할
 
 | 이름 | GitHub | 역할 |
@@ -44,6 +51,10 @@
 ## 실행 방법
 
 별도 설치나 빌드가 필요 없다.
+
+**1) 배포된 주소로 접속** — https://kodol05.github.io/hackathon-1-claude-archive/
+
+**2) 내려받아 실행**
 
 ```
 git clone https://github.com/Kodol05/hackathon-1-claude-archive.git
