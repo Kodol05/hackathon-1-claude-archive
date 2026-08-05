@@ -9,7 +9,8 @@
 # 기술 스택
 - HTML / CSS / JavaScript (프레임워크 없음)
 - 데이터 저장: 브라우저 localStorage
-- 외부 라이브러리: Chart.js (CDN) — 추가 기능인 주간 통계 차트 구현 시에만 사용. 미사용 시 "없음"으로 간주
+- 외부 라이브러리: Chart.js 4.5.0 (CDN) — 월별 활동 횟수 막대차트에 사용
+  https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js
 
 # 파일 구조
 - index.html : 화면 구조
@@ -74,6 +75,6 @@ localStorage 키: "activities"
 - [ ] 일정 등록 및 활동으로 전환
 - [ ] 출석 기록 및 연속 노쇼 위험 판정
 - [x] 기간 필터 (김현민)
-- [ ] 주간 통계 (팀별/개인별) + Chart.js
+- [x] 월별 활동 횟수 통계 + Chart.js (김현민) — 회원·팀 기능 미구현이라 팀별/개인별 대신 월별로 구현
 - [ ] 대시보드 통합
 - [ ] 반응형 레이아웃

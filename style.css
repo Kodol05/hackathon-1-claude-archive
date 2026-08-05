@@ -161,6 +161,15 @@ body {
   overflow-wrap: break-word;
 }
 
+.chart-box {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+  height: 260px;
+}
+
 .empty-message {
   color: var(--color-text-muted);
   margin-top: 16px;

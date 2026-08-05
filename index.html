@@ -47,8 +47,16 @@
       <ul id="activityList" class="activity-list" aria-live="polite"></ul>
       <p id="emptyMessage" class="empty-message" hidden>등록된 활동이 없습니다. 첫 활동을 등록해보세요.</p>
     </section>
+    <section aria-labelledby="chartHeading">
+      <h2 id="chartHeading">월별 활동 횟수</h2>
+      <div class="chart-box">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+      <p id="chartEmptyMessage" class="empty-message" hidden>표시할 통계가 없습니다.</p>
+    </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

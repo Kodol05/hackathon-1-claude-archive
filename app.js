@@ -1,5 +1,7 @@
 const ACTIVITIES_KEY = "activities";
 
+let monthlyChart = null;
+
 // localStorage에서 activities 배열을 읽어온다
 function getActivities() {
   const raw = localStorage.getItem(ACTIVITIES_KEY);
@@ -85,8 +87,58 @@ function filterActivitiesByPeriod(activities) {
   });
 }
 
+// 활동을 월(YYYY-MM)별로 세어 오름차순으로 반환한다
+function countActivitiesByMonth(activities) {
+  const counts = {};
+  for (const activity of activities) {
+    const month = activity.date.slice(0, 7);
+    counts[month] = (counts[month] || 0) + 1;
+  }
+  return Object.keys(counts).sort().map((month) => ({ month, count: counts[month] }));
+}
+
+// 월별 활동 횟수를 막대차트로 그린다. 데이터가 없으면 안내 문구만 표시한다
+function renderMonthlyChart() {
+  const canvas = document.getElementById("monthlyChart");
+  const emptyEl = document.getElementById("chartEmptyMessage");
+  const rows = countActivitiesByMonth(filterActivitiesByPeriod(getActivities()));
+
+  if (monthlyChart) {
+    monthlyChart.destroy();
+    monthlyChart = null;
+  }
+
+  canvas.hidden = rows.length === 0;
+  emptyEl.hidden = rows.length > 0;
+  if (rows.length === 0) return;
+
+  monthlyChart = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: rows.map((row) => row.month),
+      datasets: [{
+        label: "활동 횟수",
+        data: rows.map((row) => row.count),
+        backgroundColor: "#4a7a68",
+        borderRadius: 4,
+        maxBarThickness: 48
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#e6ddd0" } }
+      }
+    }
+  });
+}
+
 // activities를 정렬해 목록 화면에 그린다. 비어 있으면 안내 문구만 표시한다
 function renderActivityList() {
+  renderMonthlyChart();
   const listEl = document.getElementById("activityList");
   const emptyEl = document.getElementById("emptyMessage");
   const savedCount = getActivities().length;
