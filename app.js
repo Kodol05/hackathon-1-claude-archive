@@ -140,6 +140,7 @@ function renderMonthlyChart() {
 function renderActivityList() {
   renderMonthlyChart();
   renderWeeklyChart();
+  renderActivityHeatmap();
   renderDashboard();
   const listEl = document.getElementById("activityList");
   const emptyEl = document.getElementById("emptyMessage");
@@ -996,6 +997,56 @@ function setWeeklyView(view) {
   document.getElementById("teamViewButton").classList.toggle("view-button-active", view === "team");
   document.getElementById("memberViewButton").classList.toggle("view-button-active", view === "member");
   renderWeeklyChart();
+}
+
+/* ===== 활동 기록 히트맵 (GitHub 기여도 그래프 형식) =====
+   하루를 정사각형 한 칸으로 보고, 그날 활동 수에 따라 색을 진하게 칠한다. */
+
+// 날짜별 활동 건수를 세어 { "YYYY-MM-DD": 건수 } 형태로 반환한다
+function countActivitiesByDate() {
+  const counts = {};
+  for (const activity of getActivities()) {
+    counts[activity.date] = (counts[activity.date] || 0) + 1;
+  }
+  return counts;
+}
+
+// 최근 1년치 날짜 칸과 월 이름을 그린다
+function renderActivityHeatmap() {
+  const gridEl = document.getElementById("heatmap");
+  const monthsEl = document.getElementById("heatmapMonths");
+  const counts = countActivitiesByDate();
+
+  // 이번 주 토요일까지 채우고, 거기서 53주 전까지 거슬러 올라간다
+  const end = new Date(`${getTodayString()}T00:00:00`);
+  end.setDate(end.getDate() + (6 - end.getDay()));
+  const start = new Date(end);
+  start.setDate(start.getDate() - (53 * 7 - 1));
+
+  gridEl.innerHTML = "";
+  monthsEl.innerHTML = "";
+
+  let lastMonth = -1;
+  for (const cursor = new Date(start); cursor <= end; cursor.setDate(cursor.getDate() + 1)) {
+    const dateString = toDateString(cursor);
+    const count = counts[dateString] || 0;
+
+    const cell = document.createElement("div");
+    cell.className = `heat-cell heat-${Math.min(count, 3)}`;
+    cell.title = `${dateString} · 활동 ${count}건`;
+    gridEl.appendChild(cell);
+
+    // 각 주의 첫날(일요일)에 달이 바뀌면 월 이름을 표시한다
+    if (cursor.getDay() === 0) {
+      const label = document.createElement("span");
+      label.className = "heatmap-month";
+      if (cursor.getMonth() !== lastMonth) {
+        label.textContent = `${cursor.getMonth() + 1}월`;
+        lastMonth = cursor.getMonth();
+      }
+      monthsEl.appendChild(label);
+    }
+  }
 }
 
 /* ===== 연속 노쇼 위험 판정 + 대시보드 (담당: 김현민) ===== */
