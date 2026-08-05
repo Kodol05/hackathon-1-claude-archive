@@ -10,6 +10,11 @@
   <h1>동아리 활동 기록 관리</h1>
 
   <main>
+    <section aria-labelledby="dashboardHeading">
+      <h2 id="dashboardHeading">대시보드</h2>
+      <div id="dashboard" class="dashboard"></div>
+    </section>
+
     <section aria-labelledby="formHeading">
       <h2 id="formHeading">활동 등록</h2>
       <form id="activityForm" class="activity-form" novalidate>
@@ -27,6 +32,10 @@
 
         <label for="memoInput">메모</label>
         <textarea id="memoInput" rows="3"></textarea>
+
+        <p class="attendance-label">출석</p>
+        <div id="attendanceList" class="attendance-list"></div>
+        <p id="attendanceEmptyMessage" class="empty-message" hidden>등록된 회원이 없습니다. 회원을 등록하면 출석을 기록할 수 있습니다.</p>
 
         <p id="formError" class="form-error" role="alert" hidden></p>
         <button type="submit" class="submit-button">등록</button>

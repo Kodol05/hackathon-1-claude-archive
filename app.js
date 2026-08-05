@@ -139,6 +139,7 @@ function renderMonthlyChart() {
 // activities를 정렬해 목록 화면에 그린다. 비어 있으면 안내 문구만 표시한다
 function renderActivityList() {
   renderMonthlyChart();
+  renderDashboard();
   const listEl = document.getElementById("activityList");
   const emptyEl = document.getElementById("emptyMessage");
   const savedCount = getActivities().length;
@@ -183,6 +184,75 @@ function getTodayString() {
   return `${year}-${month}-${day}`;
 }
 
+/* ===== 출석 기록 (담당: 김현민) =====
+   회원이 등록되어 있을 때만 활동 등록 폼에 출석 입력을 표시한다.
+   회원이 없으면 기존처럼 참여 인원을 직접 입력한다. */
+
+const ATTENDANCE_LABELS = {
+  unmarked: "미기록",
+  present: "참석",
+  excused: "사전 불참",
+  noShow: "무단 불참"
+};
+
+// 회원 한 명의 출석 상태 선택 행을 만든다
+function createAttendanceRow(member) {
+  const row = document.createElement("div");
+  row.className = "attendance-row";
+
+  const name = document.createElement("span");
+  name.className = "attendance-name";
+  name.textContent = member.name;
+
+  const select = document.createElement("select");
+  select.className = "attendance-select";
+  select.dataset.memberId = member.id;
+  select.setAttribute("aria-label", `${member.name} 출석 상태`);
+
+  for (const status of Object.keys(ATTENDANCE_LABELS)) {
+    const option = document.createElement("option");
+    option.value = status;
+    option.textContent = ATTENDANCE_LABELS[status];
+    select.appendChild(option);
+  }
+
+  select.addEventListener("change", syncMemberCountFromAttendance);
+  row.append(name, select);
+  return row;
+}
+
+// 등록된 회원으로 출석 입력 목록을 다시 그린다
+function renderAttendanceInputs() {
+  const listEl = document.getElementById("attendanceList");
+  const emptyEl = document.getElementById("attendanceEmptyMessage");
+  const members = getMembers();
+
+  listEl.innerHTML = "";
+  emptyEl.hidden = members.length > 0;
+
+  for (const member of members) {
+    listEl.appendChild(createAttendanceRow(member));
+  }
+}
+
+// 출석 입력값을 { memberId, status } 배열로 읽어온다
+function readAttendance() {
+  const selects = document.querySelectorAll("#attendanceList .attendance-select");
+  return [...selects].map((select) => ({
+    memberId: select.dataset.memberId,
+    status: select.value
+  }));
+}
+
+// 참석으로 표시된 회원 수를 참여 인원 입력란에 반영한다
+function syncMemberCountFromAttendance() {
+  const attendance = readAttendance();
+  if (attendance.length === 0) return;
+
+  const presentCount = attendance.filter((record) => record.status === "present").length;
+  document.getElementById("memberCountInput").value = presentCount > 0 ? presentCount : "";
+}
+
 // 등록 폼의 입력값을 읽어 활동 정보 객체로 만든다
 function readActivityForm() {
   return {
@@ -190,7 +260,8 @@ function readActivityForm() {
     date: document.getElementById("dateInput").value,
     place: document.getElementById("placeInput").value.trim(),
     memberCount: Number(document.getElementById("memberCountInput").value),
-    memo: document.getElementById("memoInput").value.trim()
+    memo: document.getElementById("memoInput").value.trim(),
+    attendance: readAttendance()
   };
 }
 
@@ -215,6 +286,7 @@ function addActivity(input) {
     place: input.place,
     memberCount: input.memberCount,
     memo: input.memo,
+    attendance: input.attendance,
     createdAt: new Date().toISOString()
   });
   saveActivities(activities);
@@ -461,6 +533,7 @@ function handleTeamSubmit(event) {
   event.target.reset();
   refreshTeamSelect();
   renderTeamList();
+  renderDashboard();
 }
 
 // 회원 등록 폼 제출을 처리한다
@@ -485,6 +558,8 @@ function handleMemberSubmit(event) {
   addMember(input);
   event.target.reset();
   renderTeamList();
+  renderAttendanceInputs();
+  renderDashboard();
 }
 
 
@@ -648,6 +723,105 @@ function handleScheduleSubmit(event) {
 }
 
 
+/* ===== 연속 노쇼 위험 판정 + 대시보드 (담당: 김현민) ===== */
+
+// 회원 한 명의 연속 무단 불참 횟수와 근거 활동 2건을 계산한다
+function findNoShowStreak(memberId) {
+  const records = getActivities()
+    .filter((activity) => (activity.attendance || []).some((r) => r.memberId === memberId))
+    .sort((a, b) => {
+      if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+      return a.createdAt < b.createdAt ? -1 : 1;
+    });
+
+  let streak = 0;
+  let evidence = [];
+
+  for (const activity of records) {
+    const status = activity.attendance.find((r) => r.memberId === memberId).status;
+    if (status === "unmarked") continue;
+
+    if (status === "noShow") {
+      streak += 1;
+      evidence.push(activity);
+    } else {
+      streak = 0;
+      evidence = [];
+    }
+  }
+
+  return { streak, evidence: evidence.slice(-2) };
+}
+
+// 연속 무단 불참 2회 이상인 회원 목록을 반환한다
+function findNoShowRiskMembers() {
+  return getMembers()
+    .map((member) => ({ member, ...findNoShowStreak(member.id) }))
+    .filter((row) => row.streak >= 2);
+}
+
+// 대시보드 카드 하나를 만든다
+function createDashboardCard(title, lines, tone) {
+  const card = document.createElement("article");
+  card.className = `dashboard-card dashboard-${tone}`;
+
+  const heading = document.createElement("h3");
+  heading.className = "dashboard-title";
+  heading.textContent = title;
+  card.appendChild(heading);
+
+  const list = document.createElement("ul");
+  list.className = "dashboard-lines";
+
+  if (lines.length === 0) {
+    const li = document.createElement("li");
+    li.className = "dashboard-line dashboard-ok";
+    li.textContent = "해당 없음";
+    list.appendChild(li);
+  } else {
+    for (const line of lines) {
+      const li = document.createElement("li");
+      li.className = "dashboard-line";
+      li.textContent = line;
+      list.appendChild(li);
+    }
+  }
+
+  card.appendChild(list);
+  return card;
+}
+
+// 다음 일정, 정원 초과 팀, 노쇼 위험을 대시보드에 그린다
+function renderDashboard() {
+  const boardEl = document.getElementById("dashboard");
+  const today = getTodayString();
+  boardEl.innerHTML = "";
+
+  const upcoming = getSchedules()
+    .filter((schedule) => !schedule.convertedActivityId && schedule.date >= today)
+    .sort((a, b) => (a.date < b.date ? -1 : 1))
+    .slice(0, 3)
+    .map((schedule) => `${schedule.title} · ${schedule.date} (D-${getDaysUntil(schedule.date)})`);
+
+  const members = getMembers();
+  const overCapacity = getTeams()
+    .map((team) => ({
+      team,
+      over: members.filter((m) => m.teamId === team.id).length - team.capacity
+    }))
+    .filter((row) => row.over > 0)
+    .map((row) => `${row.team.name} · 정원 +${row.over}명`);
+
+  const risky = findNoShowRiskMembers().map((row) => {
+    const titles = row.evidence.map((activity) => `${activity.title}(${activity.date})`).join(", ");
+    return `${row.member.name} · 무단 불참 ${row.streak}회 연속 — ${titles}`;
+  });
+
+  boardEl.appendChild(createDashboardCard("다가오는 일정", upcoming, "info"));
+  boardEl.appendChild(createDashboardCard("정원 초과 팀", overCapacity, "warn"));
+  boardEl.appendChild(createDashboardCard("연속 노쇼 위험", risky, "danger"));
+}
+
 // 기간 필터 입력을 초기화한다
 function resetPeriodFilter() {
   document.getElementById("startDateInput").value = "";
@@ -662,6 +836,7 @@ document.getElementById("teamForm").addEventListener("submit", handleTeamSubmit)
 document.getElementById("memberForm").addEventListener("submit", handleMemberSubmit);
 refreshTeamSelect();
 renderTeamList();
+renderAttendanceInputs();
 
 document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
 document.getElementById("startDateInput").addEventListener("change", renderActivityList);
