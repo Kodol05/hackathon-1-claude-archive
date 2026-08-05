@@ -279,17 +279,20 @@ function validateActivityInput(input) {
 // 검증을 통과한 입력값을 새 활동으로 저장한다
 function addActivity(input) {
   const activities = getActivities();
+  const id = generateId();
   activities.push({
-    id: generateId(),
+    id,
     title: input.title,
     date: input.date,
     place: input.place,
     memberCount: input.memberCount,
     memo: input.memo,
     attendance: input.attendance,
+    sourceScheduleId: pendingScheduleId,
     createdAt: new Date().toISOString()
   });
   saveActivities(activities);
+  return id;
 }
 
 // 등록 폼 제출을 처리한다
@@ -307,8 +310,10 @@ function handleActivitySubmit(event) {
   }
 
   errorEl.hidden = true;
-  addActivity(input);
+  const activityId = addActivity(input);
+  completeScheduleConversion(activityId);
   event.target.reset();
+  renderAttendanceInputs();
   renderActivityList();
 }
 
@@ -678,6 +683,83 @@ function createScheduleListItem(schedule) {
     li.appendChild(memo);
   }
 
+  // 날짜가 지났거나 오늘이면 활동으로 기록할 수 있다
+  if (getDaysUntil(schedule.date) <= 0) {
+    const convertButton = document.createElement("button");
+    convertButton.type = "button";
+    convertButton.className = "convert-button";
+    convertButton.textContent = "활동으로 기록";
+    convertButton.addEventListener("click", () => startScheduleConversion(schedule.id));
+    li.appendChild(convertButton);
+  }
+
+  return li;
+}
+
+/* ===== 일정 → 활동 전환 (5단계) =====
+   일정 값을 활동 등록 폼에 복사하고, 활동 저장이 끝난 뒤에만
+   해당 일정에 convertedActivityId 를 기록해 중복 변환을 막는다. */
+
+let pendingScheduleId = null;
+
+// 일정 값을 활동 등록 폼에 복사하고 전환 대기 상태로 둔다
+function startScheduleConversion(scheduleId) {
+  const schedule = getSchedules().find((item) => item.id === scheduleId);
+  if (!schedule) return;
+
+  document.getElementById("titleInput").value = schedule.title;
+  document.getElementById("dateInput").value = schedule.date;
+  document.getElementById("placeInput").value = schedule.place;
+  document.getElementById("memoInput").value = schedule.memo;
+
+  pendingScheduleId = scheduleId;
+
+  const notice = document.getElementById("conversionNotice");
+  notice.textContent = `"${schedule.title}" 일정을 활동으로 기록하는 중입니다. 출석을 확정하고 등록하세요.`;
+  notice.hidden = false;
+
+  document.getElementById("titleInput").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+// 활동 저장이 끝난 뒤 전환된 일정에 활동 id를 기록한다
+function completeScheduleConversion(activityId) {
+  if (!pendingScheduleId) return;
+
+  const schedules = getSchedules();
+  const schedule = schedules.find((item) => item.id === pendingScheduleId);
+  if (schedule) {
+    schedule.convertedActivityId = activityId;
+    saveSchedules(schedules);
+  }
+
+  pendingScheduleId = null;
+  document.getElementById("conversionNotice").hidden = true;
+  renderScheduleList();
+}
+
+// 전환이 끝난 일정을 활동 연결 상태와 함께 보여주는 요소를 만든다
+function createConvertedScheduleItem(schedule) {
+  const li = document.createElement("li");
+  li.className = "schedule-item schedule-converted";
+
+  const main = document.createElement("div");
+  main.className = "schedule-main";
+  const title = document.createElement("span");
+  title.className = "schedule-title";
+  title.textContent = schedule.title;
+
+  const badge = document.createElement("span");
+  const linkedActivity = getActivities().find((activity) => activity.id === schedule.convertedActivityId);
+  badge.className = linkedActivity ? "done-badge" : "removed-badge";
+  badge.textContent = linkedActivity ? "기록 완료" : "연결된 활동이 삭제됨";
+
+  main.append(title, badge);
+
+  const sub = document.createElement("div");
+  sub.className = "schedule-sub";
+  sub.textContent = `${schedule.category} · ${schedule.date}`;
+
+  li.append(main, sub);
   return li;
 }
 
@@ -689,9 +771,11 @@ function renderScheduleList() {
     .filter((schedule) => !schedule.convertedActivityId)
     .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
 
+  const converted = getSchedules().filter((schedule) => schedule.convertedActivityId);
+
   listEl.innerHTML = "";
 
-  if (schedules.length === 0) {
+  if (schedules.length === 0 && converted.length === 0) {
     emptyEl.hidden = false;
     return;
   }
@@ -699,6 +783,9 @@ function renderScheduleList() {
   emptyEl.hidden = true;
   for (const schedule of schedules) {
     listEl.appendChild(createScheduleListItem(schedule));
+  }
+  for (const schedule of converted) {
+    listEl.appendChild(createConvertedScheduleItem(schedule));
   }
 }
 
