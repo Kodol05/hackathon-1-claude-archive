@@ -221,18 +221,50 @@ function createAttendanceRow(member) {
   return row;
 }
 
-// 등록된 회원으로 출석 입력 목록을 다시 그린다
+// 활동 대상(전체 동아리 또는 특정 팀)에 해당하는 회원만 반환한다
+function getAttendanceTargets() {
+  const teamId = document.getElementById("activityTeamSelect").value;
+  const members = getMembers();
+  return teamId ? members.filter((member) => member.teamId === teamId) : members;
+}
+
+// 활동 대상에 해당하는 회원으로 출석 입력 목록을 다시 그린다
 function renderAttendanceInputs() {
   const listEl = document.getElementById("attendanceList");
   const emptyEl = document.getElementById("attendanceEmptyMessage");
-  const members = getMembers();
+  const isTeamActivity = document.getElementById("activityTeamSelect").value !== "";
+  const members = getAttendanceTargets();
 
   listEl.innerHTML = "";
   emptyEl.hidden = members.length > 0;
+  emptyEl.textContent = isTeamActivity
+    ? "이 팀에 배정된 회원이 없습니다."
+    : "등록된 회원이 없습니다. 회원을 등록하면 출석을 기록할 수 있습니다.";
 
   for (const member of members) {
     listEl.appendChild(createAttendanceRow(member));
   }
+}
+
+// 활동 대상 선택지를 최신 팀 목록으로 갱신한다
+function refreshActivityTeamSelect() {
+  const select = document.getElementById("activityTeamSelect");
+  const previous = select.value;
+
+  select.innerHTML = "";
+  const allOption = document.createElement("option");
+  allOption.value = "";
+  allOption.textContent = "전체 동아리";
+  select.appendChild(allOption);
+
+  for (const team of getTeams()) {
+    const option = document.createElement("option");
+    option.value = team.id;
+    option.textContent = team.name;
+    select.appendChild(option);
+  }
+
+  select.value = previous;
 }
 
 // 출석 입력값을 { memberId, status } 배열로 읽어온다
@@ -261,6 +293,7 @@ function readActivityForm() {
     place: document.getElementById("placeInput").value.trim(),
     memberCount: Number(document.getElementById("memberCountInput").value),
     memo: document.getElementById("memoInput").value.trim(),
+    teamId: document.getElementById("activityTeamSelect").value || null,
     attendance: readAttendance()
   };
 }
@@ -270,6 +303,10 @@ function validateActivityInput(input) {
   if (!input.title) return "활동명을 입력해주세요.";
   if (!input.date) return "날짜를 선택해주세요.";
   if (input.date > getTodayString()) return "날짜는 오늘 이후로 입력할 수 없습니다.";
+  // 출석 대상이 있는데 참석자가 한 명도 없으면 저장하지 않는다
+  if (input.attendance.length > 0 && !input.attendance.some((r) => r.status === "present")) {
+    return "참석한 회원을 최소 한 명 선택해주세요.";
+  }
   if (!Number.isInteger(input.memberCount) || input.memberCount < 1) {
     return "참여 인원은 1 이상의 정수로 입력해주세요.";
   }
@@ -287,6 +324,7 @@ function addActivity(input) {
     place: input.place,
     memberCount: input.memberCount,
     memo: input.memo,
+    teamId: input.teamId,
     attendance: input.attendance,
     sourceScheduleId: pendingScheduleId,
     createdAt: new Date().toISOString()
@@ -537,6 +575,7 @@ function handleTeamSubmit(event) {
   addTeam(input);
   event.target.reset();
   refreshTeamSelect();
+  refreshActivityTeamSelect();
   renderTeamList();
   renderDashboard();
 }
@@ -921,7 +960,9 @@ function resetPeriodFilter() {
 
 document.getElementById("teamForm").addEventListener("submit", handleTeamSubmit);
 document.getElementById("memberForm").addEventListener("submit", handleMemberSubmit);
+document.getElementById("activityTeamSelect").addEventListener("change", renderAttendanceInputs);
 refreshTeamSelect();
+refreshActivityTeamSelect();
 renderTeamList();
 renderAttendanceInputs();
 
