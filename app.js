@@ -246,9 +246,9 @@ function renderAttendanceInputs() {
   }
 }
 
-// 활동 대상 선택지를 최신 팀 목록으로 갱신한다
-function refreshActivityTeamSelect() {
-  const select = document.getElementById("activityTeamSelect");
+// 대상 팀 선택지(활동·일정 공용)를 최신 팀 목록으로 갱신한다
+function refreshTargetTeamSelect(selectId) {
+  const select = document.getElementById(selectId);
   const previous = select.value;
 
   select.innerHTML = "";
@@ -265,6 +265,12 @@ function refreshActivityTeamSelect() {
   }
 
   select.value = previous;
+}
+
+// 활동 등록 폼의 대상 선택지를 갱신한다
+function refreshActivityTeamSelect() {
+  refreshTargetTeamSelect("activityTeamSelect");
+  refreshTargetTeamSelect("scheduleTeamSelect");
 }
 
 // 출석 입력값을 { memberId, status } 배열로 읽어온다
@@ -655,6 +661,7 @@ function readScheduleForm() {
     date: document.getElementById("scheduleDateInput").value,
     category: document.getElementById("scheduleCategorySelect").value,
     place: document.getElementById("schedulePlaceInput").value.trim(),
+    targetTeamId: document.getElementById("scheduleTeamSelect").value || null,
     memo: document.getElementById("scheduleMemoInput").value.trim()
   };
 }
@@ -676,7 +683,7 @@ function addSchedule(input) {
     date: input.date,
     category: input.category,
     place: input.place,
-    targetTeamId: null,
+    targetTeamId: input.targetTeamId,
     memo: input.memo,
     convertedActivityId: null,
     createdAt: new Date().toISOString()
@@ -711,7 +718,11 @@ function createScheduleListItem(schedule) {
   const place = document.createElement("span");
   place.className = "schedule-place";
   place.textContent = schedule.place;
-  sub.append(category, date, place);
+  const target = document.createElement("span");
+  target.className = "schedule-target";
+  const targetTeam = getTeams().find((team) => team.id === schedule.targetTeamId);
+  target.textContent = targetTeam ? targetTeam.name : "전체 동아리";
+  sub.append(category, date, place, target);
 
   li.append(main, sub);
 
@@ -750,6 +761,8 @@ function startScheduleConversion(scheduleId) {
   document.getElementById("dateInput").value = schedule.date;
   document.getElementById("placeInput").value = schedule.place;
   document.getElementById("memoInput").value = schedule.memo;
+  document.getElementById("activityTeamSelect").value = schedule.targetTeamId || "";
+  renderAttendanceInputs();
 
   pendingScheduleId = scheduleId;
 
