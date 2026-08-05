@@ -655,6 +655,17 @@ function formatDday(daysUntil) {
   return daysUntil === 0 ? "D-DAY" : `D-${daysUntil}`;
 }
 
+// 일정 구분에 맞는 색상 클래스 이름을 반환한다
+function getCategoryClass(category) {
+  const map = {
+    "해커톤": "category-hackathon",
+    "축제": "category-festival",
+    "정기활동": "category-regular",
+    "기타": "category-etc"
+  };
+  return map[category] || "category-etc";
+}
+
 // 일정 등록 폼의 입력값을 읽어 일정 정보 객체로 만든다
 function readScheduleForm() {
   return {
@@ -711,7 +722,7 @@ function createScheduleListItem(schedule) {
   const sub = document.createElement("div");
   sub.className = "schedule-sub";
   const category = document.createElement("span");
-  category.className = "schedule-category";
+  category.className = `schedule-category ${getCategoryClass(schedule.category)}`;
   category.textContent = schedule.category;
   const date = document.createElement("span");
   date.className = "schedule-date";

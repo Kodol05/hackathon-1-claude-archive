@@ -370,6 +370,26 @@ textarea::placeholder {
   margin-top: 4px;
 }
 
+/* 일정 구분 색 태그. info/warn/danger는 이미 다른 의미로 쓰이고 있어 겹치지 않는 색으로 골랐다 */
+.schedule-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.schedule-category::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.category-hackathon { color: #b18cf5; }
+.category-festival { color: #f28ac3; }
+.category-regular { color: var(--color-accent); }
+.category-etc { color: var(--color-text-muted); }
+
 .schedule-memo {
   margin: 8px 0 0;
   font-size: 0.9rem;
