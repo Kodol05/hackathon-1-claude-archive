@@ -2,13 +2,22 @@
   box-sizing: border-box;
 }
 
+/* 어두운 게임 스튜디오 운영 콘솔 스타일
+   정상=청록, 일정=파랑, 정원 초과=주황, 노쇼 위험=빨강 */
 :root {
-  --color-bg: #faf7f2;
-  --color-surface: #ffffff;
-  --color-border: #e6ddd0;
-  --color-text: #2b2620;
-  --color-text-muted: #7a7266;
-  --color-accent: #4a7a68;
+  --color-bg: #14181f;
+  --color-surface: #1c222c;
+  --color-border: #2e3746;
+  --color-text: #e6ebf2;
+  --color-text-muted: #94a1b2;
+  --color-accent: #3fbf9a;
+
+  --color-info: #5aa9f5;
+  --color-info-bg: #182635;
+  --color-warn: #f0a04b;
+  --color-warn-bg: #2e2418;
+  --color-danger: #f2685f;
+  --color-danger-bg: #2e1a1a;
 }
 
 body {
@@ -18,6 +27,20 @@ body {
   max-width: 880px;
   background: var(--color-bg);
   color: var(--color-text);
+}
+
+/* 어두운 배경에 맞춰 입력 요소도 어둡게 통일한다 */
+input,
+select,
+textarea {
+  background: #12161d;
+  color: var(--color-text);
+  color-scheme: dark;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7787;
 }
 
 /* ===== 화면 전환 내비게이션 ===== */
@@ -69,9 +92,9 @@ body {
 }
 
 .view-button-active {
-  border-color: #2f6fb3;
-  background: #eaf2fb;
-  color: #23507f;
+  border-color: var(--color-info);
+  background: var(--color-info-bg);
+  color: var(--color-info);
   font-weight: 600;
 }
 
@@ -79,10 +102,10 @@ body {
 .conversion-notice {
   margin: 8px 0 0;
   padding: 10px 12px;
-  border-left: 4px solid #2f6fb3;
+  border-left: 4px solid var(--color-info);
   border-radius: 6px;
-  background: #eaf2fb;
-  color: #23507f;
+  background: var(--color-info-bg);
+  color: var(--color-info);
   font-size: 0.9rem;
 }
 
@@ -91,10 +114,10 @@ body {
   font-size: 0.85rem;
   margin-top: 10px;
   padding: 6px 12px;
-  border: 1px solid #2f6fb3;
+  border: 1px solid var(--color-info);
   border-radius: 6px;
   background: var(--color-surface);
-  color: #2f6fb3;
+  color: var(--color-info);
   cursor: pointer;
 }
 
@@ -110,15 +133,15 @@ body {
 }
 
 .done-badge {
-  border: 1px solid #4a7a68;
-  background: #eaf3ef;
-  color: #35604f;
+  border: 1px solid var(--color-accent);
+  background: #17342c;
+  color: var(--color-accent);
 }
 
 .removed-badge {
-  border: 1px solid #b3261e;
-  background: #fdecea;
-  color: #b3261e;
+  border: 1px solid var(--color-danger);
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 /* ===== 대시보드 · 출석 스타일 (담당: 김현민) ===== */
@@ -138,9 +161,9 @@ body {
   padding: 12px 16px;
 }
 
-.dashboard-info { border-left-color: #2f6fb3; }
-.dashboard-warn { border-left-color: #b26a00; }
-.dashboard-danger { border-left-color: #b3261e; }
+.dashboard-info { border-left-color: var(--color-info); }
+.dashboard-warn { border-left-color: var(--color-warn); }
+.dashboard-danger { border-left-color: var(--color-danger); }
 
 .dashboard-title {
   margin: 0 0 8px;
@@ -251,10 +274,10 @@ body {
 .capacity-badge {
   font-size: 0.8rem;
   padding: 2px 8px;
-  border: 1px solid #b26a00;
+  border: 1px solid var(--color-warn);
   border-radius: 999px;
-  background: #fff4e5;
-  color: #b26a00;
+  background: var(--color-warn-bg);
+  color: var(--color-warn);
 }
 
 .member-list {
@@ -333,8 +356,8 @@ body {
   font-weight: 600;
   padding: 2px 10px;
   border-radius: 999px;
-  background: #e8f0fb;
-  color: #2b5fa8;
+  background: var(--color-info-bg);
+  color: var(--color-info);
   white-space: nowrap;
 }
 
@@ -411,7 +434,7 @@ body {
 }
 
 .form-error {
-  color: #b3261e;
+  color: var(--color-danger);
   font-size: 0.9rem;
   margin: 12px 0 0;
 }
@@ -423,7 +446,8 @@ body {
   border: none;
   border-radius: 6px;
   background: var(--color-accent);
-  color: #ffffff;
+  color: #0f1720;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -498,19 +522,19 @@ body {
   font: inherit;
   font-size: 0.85rem;
   padding: 4px 10px;
-  border: 1px solid #b3261e;
+  border: 1px solid var(--color-danger);
   border-radius: 6px;
   background: var(--color-surface);
-  color: #b3261e;
+  color: var(--color-danger);
   cursor: pointer;
 }
 
 .delete-button:hover {
-  background: #fdecea;
+  background: var(--color-danger-bg);
 }
 
 .delete-button:focus-visible {
-  outline: 2px solid #b3261e;
+  outline: 2px solid var(--color-danger);
   outline-offset: 2px;
 }
 

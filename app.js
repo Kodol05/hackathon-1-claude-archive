@@ -119,7 +119,7 @@ function renderMonthlyChart() {
       datasets: [{
         label: "활동 횟수",
         data: rows.map((row) => row.count),
-        backgroundColor: "#4a7a68",
+        backgroundColor: "#3fbf9a",
         borderRadius: 4,
         maxBarThickness: 48
       }]
@@ -129,8 +129,8 @@ function renderMonthlyChart() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#e6ddd0" } }
+        x: { grid: { display: false }, ticks: { color: "#94a1b2" } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: "#94a1b2" }, grid: { color: "#2e3746" } }
       }
     }
   });
@@ -962,7 +962,7 @@ function renderWeeklyChart() {
       datasets: [{
         label: weeklyView === "team" ? "팀 활동 횟수" : "개인 참석 횟수",
         data: rows.map((row) => row.count),
-        backgroundColor: "#2f6fb3",
+        backgroundColor: "#5aa9f5",
         borderRadius: 4,
         maxBarThickness: 48
       }]
@@ -972,8 +972,8 @@ function renderWeeklyChart() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false } },
-        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#e6ddd0" } }
+        x: { grid: { display: false }, ticks: { color: "#94a1b2" } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: "#94a1b2" }, grid: { color: "#2e3746" } }
       }
     }
   });
