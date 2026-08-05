@@ -67,7 +67,7 @@ localStorage 키: "activities"
 - [x] 공통 저장 함수: getActivities / saveActivities / generateId (김현민)
 - [x] 활동 등록 + 입력값 검증 (김현민)
 - [x] 활동 목록 조회 (이정호)
-- [ ] 활동 삭제 (이정호)
+- [x] 활동 삭제 (이정호)
 
 ## 추가 (시간이 되면 진행, `ideas/재웅.md` 7장 우선순위 참고)
 - [ ] 회원·팀 관리, 정원 초과 경고
