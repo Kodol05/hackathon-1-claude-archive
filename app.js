@@ -256,6 +256,237 @@ function handleActivitySubmit(event) {
                          (초과해도 저장은 허용, 경고만 표시)
    ========================================================= */
 
+const TEAMS_KEY = "teams";
+const MEMBERS_KEY = "members";
+
+const ROLE_LABELS = {
+  planning: "기획",
+  programming: "프로그래밍",
+  art: "아트",
+  sound: "사운드",
+  other: "기타"
+};
+
+// localStorage에서 teams 배열을 읽어온다
+function getTeams() {
+  const raw = localStorage.getItem(TEAMS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+// teams 배열 전체를 localStorage에 저장한다
+function saveTeams(list) {
+  localStorage.setItem(TEAMS_KEY, JSON.stringify(list));
+}
+
+// localStorage에서 members 배열을 읽어온다
+function getMembers() {
+  const raw = localStorage.getItem(MEMBERS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+// members 배열 전체를 localStorage에 저장한다
+function saveMembers(list) {
+  localStorage.setItem(MEMBERS_KEY, JSON.stringify(list));
+}
+
+// 해당 팀에 배정된 회원 수를 센다
+function countTeamMembers(teamId) {
+  return getMembers().filter((member) => member.teamId === teamId).length;
+}
+
+// 같은 이름이 이미 있는지 대소문자를 구분하지 않고 확인한다
+function hasSameName(list, name) {
+  return list.some((item) => item.name.toLowerCase() === name.toLowerCase());
+}
+
+// 팀 입력값을 검증해 오류 문구를 반환한다. 문제가 없으면 빈 문자열을 반환한다
+function validateTeamInput(input) {
+  if (!input.name) return "팀 이름을 입력해주세요.";
+  if (hasSameName(getTeams(), input.name)) return "이미 등록된 팀 이름입니다.";
+  if (!Number.isInteger(input.capacity) || input.capacity < 1) {
+    return "권장 정원은 1 이상의 정수로 입력해주세요.";
+  }
+  return "";
+}
+
+// 검증을 통과한 입력값을 새 팀으로 저장한다
+function addTeam(input) {
+  const teams = getTeams();
+  teams.push({
+    id: generateId(),
+    name: input.name,
+    capacity: input.capacity,
+    createdAt: new Date().toISOString()
+  });
+  saveTeams(teams);
+}
+
+// 회원 입력값을 검증해 오류 문구를 반환한다. 문제가 없으면 빈 문자열을 반환한다
+function validateMemberInput(input) {
+  if (!input.name) return "회원 이름을 입력해주세요.";
+  if (hasSameName(getMembers(), input.name)) return "이미 등록된 회원 이름입니다.";
+  return "";
+}
+
+// 검증을 통과한 입력값을 새 회원으로 저장한다
+function addMember(input) {
+  const members = getMembers();
+  members.push({
+    id: generateId(),
+    name: input.name,
+    role: input.role,
+    teamId: input.teamId,
+    createdAt: new Date().toISOString()
+  });
+  saveMembers(members);
+}
+
+// 회원 한 명을 목록에 표시할 요소로 만든다
+function createMemberItem(member) {
+  const li = document.createElement("li");
+  li.className = "member-item";
+  li.textContent = `${member.name} · ${ROLE_LABELS[member.role]}`;
+  return li;
+}
+
+// 회원 배열을 담은 카드를 만든다. 정원을 넘기면 경고 배지를 붙인다
+function createTeamCard(title, members, capacity) {
+  const card = document.createElement("article");
+  card.className = "team-card";
+
+  const head = document.createElement("div");
+  head.className = "team-head";
+
+  const name = document.createElement("span");
+  name.className = "team-name";
+  name.textContent = title;
+
+  const count = document.createElement("span");
+  count.className = "team-count";
+  count.textContent = capacity === null
+    ? `${members.length}명`
+    : `${members.length} / ${capacity}명`;
+
+  head.append(name, count);
+
+  const over = capacity === null ? 0 : members.length - capacity;
+  if (over > 0) {
+    const badge = document.createElement("span");
+    badge.className = "capacity-badge";
+    badge.textContent = `정원 +${over}명`;
+    head.appendChild(badge);
+  }
+
+  card.appendChild(head);
+
+  const list = document.createElement("ul");
+  list.className = "member-list";
+
+  if (members.length === 0) {
+    const empty = document.createElement("li");
+    empty.className = "member-item member-empty";
+    empty.textContent = "배정된 회원이 없습니다.";
+    list.appendChild(empty);
+  } else {
+    for (const member of members) {
+      list.appendChild(createMemberItem(member));
+    }
+  }
+
+  card.appendChild(list);
+  return card;
+}
+
+// 팀 카드와 미배정 회원 카드를 화면에 그린다
+function renderTeamList() {
+  const listEl = document.getElementById("teamList");
+  const emptyEl = document.getElementById("teamEmptyMessage");
+  const teams = getTeams();
+  const members = getMembers();
+  const unassigned = members.filter((member) => !member.teamId);
+
+  listEl.innerHTML = "";
+  emptyEl.hidden = teams.length > 0 || members.length > 0;
+
+  for (const team of teams) {
+    const teamMembers = members.filter((member) => member.teamId === team.id);
+    listEl.appendChild(createTeamCard(team.name, teamMembers, team.capacity));
+  }
+
+  if (unassigned.length > 0) {
+    listEl.appendChild(createTeamCard("미배정 회원", unassigned, null));
+  }
+}
+
+// 회원 등록 폼의 소속 팀 선택지를 최신 팀 목록으로 갱신한다
+function refreshTeamSelect() {
+  const select = document.getElementById("memberTeamSelect");
+  const previous = select.value;
+
+  select.innerHTML = "";
+  const noneOption = document.createElement("option");
+  noneOption.value = "";
+  noneOption.textContent = "미배정";
+  select.appendChild(noneOption);
+
+  for (const team of getTeams()) {
+    const option = document.createElement("option");
+    option.value = team.id;
+    option.textContent = team.name;
+    select.appendChild(option);
+  }
+
+  select.value = previous;
+}
+
+// 팀 등록 폼 제출을 처리한다
+function handleTeamSubmit(event) {
+  event.preventDefault();
+
+  const input = {
+    name: document.getElementById("teamNameInput").value.trim(),
+    capacity: Number(document.getElementById("teamCapacityInput").value)
+  };
+  const errorEl = document.getElementById("teamFormError");
+  const errorMessage = validateTeamInput(input);
+
+  if (errorMessage) {
+    errorEl.textContent = errorMessage;
+    errorEl.hidden = false;
+    return;
+  }
+
+  errorEl.hidden = true;
+  addTeam(input);
+  event.target.reset();
+  refreshTeamSelect();
+  renderTeamList();
+}
+
+// 회원 등록 폼 제출을 처리한다
+function handleMemberSubmit(event) {
+  event.preventDefault();
+
+  const input = {
+    name: document.getElementById("memberNameInput").value.trim(),
+    role: document.getElementById("memberRoleSelect").value,
+    teamId: document.getElementById("memberTeamSelect").value || null
+  };
+  const errorEl = document.getElementById("memberFormError");
+  const errorMessage = validateMemberInput(input);
+
+  if (errorMessage) {
+    errorEl.textContent = errorMessage;
+    errorEl.hidden = false;
+    return;
+  }
+
+  errorEl.hidden = true;
+  addMember(input);
+  event.target.reset();
+  renderTeamList();
+}
+
 
 /* =========================================================
    일정 관리  (담당: 이정호)
@@ -281,8 +512,12 @@ function resetPeriodFilter() {
 }
 
 // --- 아래에 각자 담당 기능의 이벤트 리스너와 초기 렌더 호출을 추가한다 ---
-// 김현민: teamForm / memberForm submit 리스너 + renderTeamList();
 // 이정호: scheduleForm submit 리스너 + renderScheduleList();
+
+document.getElementById("teamForm").addEventListener("submit", handleTeamSubmit);
+document.getElementById("memberForm").addEventListener("submit", handleMemberSubmit);
+refreshTeamSelect();
+renderTeamList();
 
 document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
 document.getElementById("startDateInput").addEventListener("change", renderActivityList);

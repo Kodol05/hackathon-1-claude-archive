@@ -55,6 +55,51 @@
          - <div id="teamList">    : 팀 카드 목록. 정원 초과 시 "정원 +N명" 배지
          - <p id="teamEmptyMessage"> : 등록된 팀이 없을 때 안내
     -->
+    <section aria-labelledby="teamHeading">
+      <h2 id="teamHeading">회원·팀 관리</h2>
+
+      <div class="form-row">
+        <form id="teamForm" class="activity-form" novalidate>
+          <h3 class="form-title">팀 등록</h3>
+
+          <label for="teamNameInput">팀 이름</label>
+          <input type="text" id="teamNameInput" placeholder="예) 알파팀">
+
+          <label for="teamCapacityInput">권장 정원</label>
+          <input type="number" id="teamCapacityInput" min="1" step="1" placeholder="5">
+
+          <p id="teamFormError" class="form-error" role="alert" hidden></p>
+          <button type="submit" class="submit-button">팀 등록</button>
+        </form>
+
+        <form id="memberForm" class="activity-form" novalidate>
+          <h3 class="form-title">회원 등록</h3>
+
+          <label for="memberNameInput">회원 이름</label>
+          <input type="text" id="memberNameInput" placeholder="예) 홍길동">
+
+          <label for="memberRoleSelect">직군</label>
+          <select id="memberRoleSelect">
+            <option value="planning">기획</option>
+            <option value="programming">프로그래밍</option>
+            <option value="art">아트</option>
+            <option value="sound">사운드</option>
+            <option value="other">기타</option>
+          </select>
+
+          <label for="memberTeamSelect">소속 팀</label>
+          <select id="memberTeamSelect">
+            <option value="">미배정</option>
+          </select>
+
+          <p id="memberFormError" class="form-error" role="alert" hidden></p>
+          <button type="submit" class="submit-button">회원 등록</button>
+        </form>
+      </div>
+
+      <div id="teamList" class="team-list"></div>
+      <p id="teamEmptyMessage" class="empty-message" hidden>등록된 팀이 없습니다. 팀과 회원을 먼저 등록해보세요.</p>
+    </section>
 
 
     <!-- ===== 일정 관리 (담당: 이정호) =====
