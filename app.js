@@ -272,6 +272,150 @@ function handleActivitySubmit(event) {
        · 일정이 없으면 안내 문구 표시
    ========================================================= */
 
+// localStorage에서 schedules 배열을 읽어온다
+function getSchedules() {
+  const raw = localStorage.getItem("schedules");
+  return raw ? JSON.parse(raw) : [];
+}
+
+// schedules 배열 전체를 localStorage에 저장한다
+function saveSchedules(list) {
+  localStorage.setItem("schedules", JSON.stringify(list));
+}
+
+// 오늘 기준으로 해당 날짜까지 남은 일수를 계산한다 (오늘이면 0)
+function getDaysUntil(date) {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const [ty, tm, td] = getTodayString().split("-").map(Number);
+  const [dy, dm, dd] = date.split("-").map(Number);
+  const todayUTC = Date.UTC(ty, tm - 1, td);
+  const targetUTC = Date.UTC(dy, dm - 1, dd);
+  return Math.round((targetUTC - todayUTC) / msPerDay);
+}
+
+// 남은 일수를 "D-3", "D-DAY" 형식의 배지 문구로 바꾼다
+function formatDday(daysUntil) {
+  return daysUntil === 0 ? "D-DAY" : `D-${daysUntil}`;
+}
+
+// 일정 등록 폼의 입력값을 읽어 일정 정보 객체로 만든다
+function readScheduleForm() {
+  return {
+    title: document.getElementById("scheduleTitleInput").value.trim(),
+    date: document.getElementById("scheduleDateInput").value,
+    category: document.getElementById("scheduleCategorySelect").value,
+    place: document.getElementById("schedulePlaceInput").value.trim(),
+    memo: document.getElementById("scheduleMemoInput").value.trim()
+  };
+}
+
+// 일정 입력값을 검증해 오류 문구를 반환한다. 문제가 없으면 빈 문자열을 반환한다
+function validateScheduleInput(input) {
+  if (!input.title) return "일정명을 입력해주세요.";
+  if (!input.date) return "날짜를 선택해주세요.";
+  if (input.date < getTodayString()) return "날짜는 오늘 또는 이후로 입력할 수 없습니다.";
+  return "";
+}
+
+// 검증을 통과한 입력값을 새 일정으로 저장한다
+function addSchedule(input) {
+  const schedules = getSchedules();
+  schedules.push({
+    id: generateId(),
+    title: input.title,
+    date: input.date,
+    category: input.category,
+    place: input.place,
+    targetTeamId: null,
+    memo: input.memo,
+    convertedActivityId: null,
+    createdAt: new Date().toISOString()
+  });
+  saveSchedules(schedules);
+}
+
+// 일정 하나를 목록에 표시할 <li> 요소로 만든다
+function createScheduleListItem(schedule) {
+  const li = document.createElement("li");
+  li.className = "schedule-item";
+  li.dataset.id = schedule.id;
+
+  const main = document.createElement("div");
+  main.className = "schedule-main";
+  const title = document.createElement("span");
+  title.className = "schedule-title";
+  title.textContent = schedule.title;
+  const ddayBadge = document.createElement("span");
+  ddayBadge.className = "dday-badge";
+  ddayBadge.textContent = formatDday(getDaysUntil(schedule.date));
+  main.append(title, ddayBadge);
+
+  const sub = document.createElement("div");
+  sub.className = "schedule-sub";
+  const category = document.createElement("span");
+  category.className = "schedule-category";
+  category.textContent = schedule.category;
+  const date = document.createElement("span");
+  date.className = "schedule-date";
+  date.textContent = schedule.date;
+  const place = document.createElement("span");
+  place.className = "schedule-place";
+  place.textContent = schedule.place;
+  sub.append(category, date, place);
+
+  li.append(main, sub);
+
+  if (schedule.memo) {
+    const memo = document.createElement("p");
+    memo.className = "schedule-memo";
+    memo.textContent = schedule.memo;
+    li.appendChild(memo);
+  }
+
+  return li;
+}
+
+// 전환되지 않은 일정을 D-day 가까운 순으로 정렬해 화면에 그린다. 없으면 안내 문구만 표시한다
+function renderScheduleList() {
+  const listEl = document.getElementById("scheduleList");
+  const emptyEl = document.getElementById("scheduleEmptyMessage");
+  const schedules = getSchedules()
+    .filter((schedule) => !schedule.convertedActivityId)
+    .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+
+  listEl.innerHTML = "";
+
+  if (schedules.length === 0) {
+    emptyEl.hidden = false;
+    return;
+  }
+
+  emptyEl.hidden = true;
+  for (const schedule of schedules) {
+    listEl.appendChild(createScheduleListItem(schedule));
+  }
+}
+
+// 일정 등록 폼 제출을 처리한다
+function handleScheduleSubmit(event) {
+  event.preventDefault();
+
+  const input = readScheduleForm();
+  const errorMessage = validateScheduleInput(input);
+  const errorEl = document.getElementById("scheduleFormError");
+
+  if (errorMessage) {
+    errorEl.textContent = errorMessage;
+    errorEl.hidden = false;
+    return;
+  }
+
+  errorEl.hidden = true;
+  addSchedule(input);
+  event.target.reset();
+  renderScheduleList();
+}
+
 
 // 기간 필터 입력을 초기화한다
 function resetPeriodFilter() {
@@ -289,3 +433,6 @@ document.getElementById("startDateInput").addEventListener("change", renderActiv
 document.getElementById("endDateInput").addEventListener("change", renderActivityList);
 document.getElementById("resetFilterButton").addEventListener("click", resetPeriodFilter);
 renderActivityList();
+
+document.getElementById("scheduleForm").addEventListener("submit", handleScheduleSubmit);
+renderScheduleList();

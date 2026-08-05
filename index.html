@@ -57,14 +57,36 @@
     -->
 
 
-    <!-- ===== 일정 관리 (담당: 이정호) =====
-         이 주석 안에 아래 요소를 만든다. 다른 사람 구역은 건드리지 않는다.
-         - <form id="scheduleForm"> : 일정명(scheduleTitleInput), 날짜(scheduleDateInput),
-                                      구분(scheduleCategorySelect: 해커톤/축제/정기활동/기타),
-                                      장소(schedulePlaceInput), 메모(scheduleMemoInput)
-         - <ul id="scheduleList">   : D-day 가까운 순 일정 목록
-         - <p id="scheduleEmptyMessage"> : 등록된 일정이 없을 때 안내
-    -->
+    <section aria-labelledby="scheduleHeading">
+      <h2 id="scheduleHeading">일정 관리</h2>
+      <form id="scheduleForm" class="schedule-form" novalidate>
+        <label for="scheduleTitleInput">일정명</label>
+        <input type="text" id="scheduleTitleInput" placeholder="예) 정기 해커톤">
+
+        <label for="scheduleDateInput">날짜</label>
+        <input type="date" id="scheduleDateInput">
+
+        <label for="scheduleCategorySelect">구분</label>
+        <select id="scheduleCategorySelect">
+          <option value="해커톤">해커톤</option>
+          <option value="축제">축제</option>
+          <option value="정기활동">정기활동</option>
+          <option value="기타">기타</option>
+        </select>
+
+        <label for="schedulePlaceInput">장소</label>
+        <input type="text" id="schedulePlaceInput" placeholder="예) 학생회관 201호">
+
+        <label for="scheduleMemoInput">메모</label>
+        <textarea id="scheduleMemoInput" rows="3"></textarea>
+
+        <p id="scheduleFormError" class="form-error" role="alert" hidden></p>
+        <button type="submit" class="submit-button">일정 등록</button>
+      </form>
+
+      <ul id="scheduleList" class="schedule-list" aria-live="polite"></ul>
+      <p id="scheduleEmptyMessage" class="empty-message" hidden>등록된 일정이 없습니다. 다가오는 일정을 등록해보세요.</p>
+    </section>
 
 
     <section aria-labelledby="chartHeading">
