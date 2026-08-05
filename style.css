@@ -13,10 +13,34 @@
 
 body {
   font-family: sans-serif;
-  margin: 0;
+  margin: 0 auto;
   padding: 16px;
+  max-width: 880px;
   background: var(--color-bg);
   color: var(--color-text);
+}
+
+/* 모바일 화면에서는 폼과 필터를 한 열로 배치한다 */
+@media (max-width: 600px) {
+  .activity-form {
+    max-width: none;
+  }
+
+  .filter-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 8px;
+  }
+
+  .reset-button {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .activity-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .activity-form {
