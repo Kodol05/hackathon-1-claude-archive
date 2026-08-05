@@ -19,6 +19,47 @@ body {
   color: var(--color-text);
 }
 
+.activity-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 16px;
+  max-width: 480px;
+}
+
+.activity-form label {
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+
+.activity-form input,
+.activity-form textarea {
+  font: inherit;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.form-error {
+  color: #b3261e;
+  font-size: 0.9rem;
+  margin: 12px 0 0;
+}
+
+.submit-button {
+  font: inherit;
+  margin-top: 16px;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: #ffffff;
+  cursor: pointer;
+}
+
 .activity-list {
   list-style: none;
   margin: 16px 0 0;

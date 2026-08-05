@@ -10,6 +10,29 @@
   <h1>동아리 활동 기록 관리</h1>
 
   <main>
+    <section aria-labelledby="formHeading">
+      <h2 id="formHeading">활동 등록</h2>
+      <form id="activityForm" class="activity-form" novalidate>
+        <label for="titleInput">활동명</label>
+        <input type="text" id="titleInput" placeholder="예) 정기 모임">
+
+        <label for="dateInput">날짜</label>
+        <input type="date" id="dateInput">
+
+        <label for="placeInput">장소</label>
+        <input type="text" id="placeInput" placeholder="예) 학생회관 201호">
+
+        <label for="memberCountInput">참여 인원</label>
+        <input type="number" id="memberCountInput" min="1" step="1" placeholder="1">
+
+        <label for="memoInput">메모</label>
+        <textarea id="memoInput" rows="3"></textarea>
+
+        <p id="formError" class="form-error" role="alert" hidden></p>
+        <button type="submit" class="submit-button">등록</button>
+      </form>
+    </section>
+
     <section aria-labelledby="listHeading">
       <h2 id="listHeading">활동 목록</h2>
       <ul id="activityList" class="activity-list" aria-live="polite"></ul>

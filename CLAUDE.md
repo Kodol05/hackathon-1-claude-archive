@@ -65,7 +65,7 @@ localStorage 키: "activities"
 
 ## 필수 (1단계, 김현민·이정호 개발 — 박재웅은 기획/보고서 담당)
 - [x] 공통 저장 함수: getActivities / saveActivities / generateId (김현민)
-- [ ] 활동 등록 + 입력값 검증 (김현민)
+- [x] 활동 등록 + 입력값 검증 (김현민)
 - [x] 활동 목록 조회 (이정호)
 - [ ] 활동 삭제 (이정호)
 

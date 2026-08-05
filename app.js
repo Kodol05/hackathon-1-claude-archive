@@ -81,4 +81,71 @@ function renderActivityList() {
   }
 }
 
+// 오늘 날짜를 YYYY-MM-DD 형식으로 반환한다
+function getTodayString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+// 등록 폼의 입력값을 읽어 활동 정보 객체로 만든다
+function readActivityForm() {
+  return {
+    title: document.getElementById("titleInput").value.trim(),
+    date: document.getElementById("dateInput").value,
+    place: document.getElementById("placeInput").value.trim(),
+    memberCount: Number(document.getElementById("memberCountInput").value),
+    memo: document.getElementById("memoInput").value.trim()
+  };
+}
+
+// 입력값을 검증해 오류 문구를 반환한다. 문제가 없으면 빈 문자열을 반환한다
+function validateActivityInput(input) {
+  if (!input.title) return "활동명을 입력해주세요.";
+  if (!input.date) return "날짜를 선택해주세요.";
+  if (input.date > getTodayString()) return "날짜는 오늘 이후로 입력할 수 없습니다.";
+  if (!Number.isInteger(input.memberCount) || input.memberCount < 1) {
+    return "참여 인원은 1 이상의 정수로 입력해주세요.";
+  }
+  return "";
+}
+
+// 검증을 통과한 입력값을 새 활동으로 저장한다
+function addActivity(input) {
+  const activities = getActivities();
+  activities.push({
+    id: generateId(),
+    title: input.title,
+    date: input.date,
+    place: input.place,
+    memberCount: input.memberCount,
+    memo: input.memo,
+    createdAt: new Date().toISOString()
+  });
+  saveActivities(activities);
+}
+
+// 등록 폼 제출을 처리한다
+function handleActivitySubmit(event) {
+  event.preventDefault();
+
+  const input = readActivityForm();
+  const errorMessage = validateActivityInput(input);
+  const errorEl = document.getElementById("formError");
+
+  if (errorMessage) {
+    errorEl.textContent = errorMessage;
+    errorEl.hidden = false;
+    return;
+  }
+
+  errorEl.hidden = true;
+  addActivity(input);
+  event.target.reset();
+  renderActivityList();
+}
+
+document.getElementById("activityForm").addEventListener("submit", handleActivitySubmit);
 renderActivityList();
