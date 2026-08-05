@@ -30,6 +30,11 @@
 { id, title, date, place, memberCount, memo, createdAt }
 localStorage 키: "activities"
 
+공통 저장 함수 (김현민 구현, 이정호는 이 함수 시그니처를 기준으로 목록·삭제를 개발한다):
+- getActivities() : activities 배열을 localStorage에서 읽어 반환
+- saveActivities(list) : activities 배열 전체를 localStorage에 저장
+- generateId() : 고유 id 문자열 생성
+
 ## 추가 (선택 구현, `ideas/재웅.md` 기획 참고)
 아래는 추가 기능을 구현할 때만 사용한다. 필수 필드(id, title, date, place, memberCount, memo, createdAt)는 이름을 바꾸거나 제거하지 않고, 아래 필드만 덧붙인다.
 
@@ -58,11 +63,11 @@ localStorage 키: "activities"
 
 # 현재 진행 상황
 
-## 필수
-- [ ] 활동 등록 (김현민)
+## 필수 (1단계, 김현민·이정호 개발 — 박재웅은 기획/보고서 담당)
+- [ ] 공통 저장 함수: getActivities / saveActivities / generateId (김현민)
+- [ ] 활동 등록 + 입력값 검증 (김현민)
 - [ ] 활동 목록 조회 (이정호)
-- [ ] 활동 삭제 (박재웅)
-- [ ] 입력값 검증
+- [ ] 활동 삭제 (이정호)
 
 ## 추가 (시간이 되면 진행, `ideas/재웅.md` 7장 우선순위 참고)
 - [ ] 회원·팀 관리, 정원 초과 경고
